@@ -38,5 +38,3 @@
 ## Learnings / notes
 - The killer issues: missing SRV records and DNS binding to loopback only; fix by verifying DNS Interfaces and restarting Netlogon.  
 - GPO timing: some policies require logoff/logon or gpupdate /force; lock screen (computer) policies require reboot.
-
-Contact: your.email@example.com
