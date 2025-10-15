@@ -1,39 +1,64 @@
-# Join checklist — client → curtis.org
+# Domain join checklist — curtis.org
 
-**Preconditions**
-- DC IP: 192.168.1.166 (example)
-- Client running Windows 11 Pro
-- DC DNS service running and zone curtis.org exists
+Purpose
+Quick checklist to join a Windows client to the curtis.org domain and validate the join. Keep this at-hand when repeating the lab.
 
-## On the DC (run as Administrator)
-1. Confirm DNS service:
-   - `Get-Service dns` → Status: Running
-   - DNS Manager → curtis.org zone exists → A record points to 192.168.1.166
-2. Force registration:
-   - `ipconfig /flushdns`
-   - `ipconfig /registerdns`
-   - `net stop netlogon && net start netlogon`
-3. Confirm SRV records exist in DNS Manager under `_msdcs` and `_tcp` (e.g. _ldap._tcp).
+Prerequisites
+- Domain Controller (DC) up and reachable (example IP: 192.168.1.166).
+- DNS running on the DC (AD DS + DNS installed).
+- Client and DC on same L2 network or routable network path.
+- Local admin on the client and Domain Admin credentials for the join.
 
-## On the client (Windows 11 Pro)
-1. Set DNS to the DC only:
-   - Settings → Network & internet → Adapter → IPv4 → Preferred DNS: `192.168.1.166`
-2. Flush and test:
-   - `ipconfig /flushdns`
-   - `nslookup curtis.org` → should return 192.168.1.166
-   - `nslookup -type=SRV _ldap._tcp.curtis.org` → should list SRV pointing to DC
-3. Test ports:
-   - PowerShell: `Test-NetConnection -ComputerName 192.168.1.166 -Port 389`
-   - Ensure TcpTestSucceeded : True
-4. Join domain:
-   - GUI: Settings → Accounts → Access work or school → Join a domain → enter `curtis.org`
-   - Or PowerShell (Admin): `Add-Computer -DomainName "curtis.org" -Credential (Get-Credential) -Restart`
-5. After reboot, log in using domain user: `curtis\lab_user1`. Verify policies:
-   - `gpupdate /force`
-   - `gpresult /r` or `gpresult /h C:\temp\gpo.html`
+Steps
 
-## Troubleshooting quick hits
-- If nslookup returns server but times out: ensure DNS service listening on 0.0.0.0:53 (run `netstat -an | findstr ":53"` on DC) and firewall allows UDP/TCP 53.  
-- If SRV missing: re-run netlogon restart and `ipconfig /registerdns`.  
-- If Kerberos/Time errors: sync clocks (`w32tm /resync`).
+1) Basic network checks (on client)
+   - Ensure client can ping the DC:
+     `ping 192.168.1.166`
+   - Confirm the client’s DNS is set to the DC IP (important):
+     - Windows: Settings → Network → Adapter → IPv4 → DNS = `192.168.1.166`
+     - Or run: `ipconfig /all` and check “DNS Servers”
 
+2) Verify AD DNS registration (optional but fast)
+   - From the client:
+     `nslookup -type=SRV _ldap._tcp.curtis.org`
+   - Expected: SRV record(s) pointing to the DC hostname and IP.
+
+3) Server-side quick checks (on DC)
+   - Open DNS Manager → Forward Lookup Zones → `curtis.org` → confirm host (A) records and _msdcs entries exist.
+   - DNS Server Properties → Interfaces: confirm DNS is listening on the DC IP (not only loopback).
+
+4) If SRV/records are missing
+   - On DC: `net stop netlogon` then `net start netlogon`
+   - On DC: `ipconfig /registerdns`
+   - Wait 30–60s and re-check `nslookup -type=SRV ...` from client.
+
+5) Join the domain (pick one)
+
+   GUI:
+   - Settings → Accounts → Access work or school → Join a domain → enter `curtis.org`
+   - Provide domain admin credentials when prompted and accept restart.
+
+   PowerShell (as local admin on client):
+   ```powershell
+   $cred = Get-Credential    # enter DOMAIN\Administrator
+   Add-Computer -DomainName curtis.org -Credential $cred -Restart
+   
+6 ) Post-join validation (after restart)
+    On client: sign in using a domain account (use curtis\youruser).
+    From client run:
+    whoami (should show curtis\<username>)
+    nltest /dsgetdc:curtis.org (discovers DC)
+    nslookup curtis.org (resolves DC IP)
+    gpupdate /force then gpresult /r to confirm GPOs
+
+7 ) Common fixes if join fails
+    Ensure client DNS points only to DC (not to external DNS). Fix and retry join.
+    If credentials rejected: ensure clock skew is < 5 minutes between client and DC (fix with w32tm /resync).
+    If SRV not found: restart Netlogon and register DNS (steps in #4).
+    Check Event Viewer (System and Directory Service logs) on the DC and client for detailed errors.
+
+ 8 ) Optional: remove a computer (cleanup)
+     From ADUC on DC: Computers → right-click machine → Delete
+     On client if still reachable: Remove-Computer -UnjoinDomaincredential (Get-Credential) -Restart   
+
+    
