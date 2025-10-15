@@ -40,12 +40,8 @@
 All artifacts are in the repo under `projects/windows-ad-lab/`
 
 - `diagram.png` — sanitized network diagram (topology & IPs)  
-- `checklists/join-checklist.md` — step-by-step domain-join checklist (copyable)  
-- `scripts/` — PowerShell snippets (no credentials)  
-- `screenshots/` — visual proof (sanitized). Recommended primary screenshots to feature:
-  - `04-aduc-domain-tree.png` — AD Users & Computers (domain + joined client) 
-  - `02-dns-srv-records.png` — `nslookup -type=SRV _ldap._tcp.curtis.org` output 
-  - `07-client-ipconfig.png` — `ipconfig /all` on client showing DNS set to DC 
+- `checklists/join-checklist.md` — step-by-step domain-join checklist (copyable)   
+- `screenshots/`
 - Other screenshots in that folder (03, 05, 06, 08, 09, 10) show DNS settings, GPO linking, gpresult outputs and Server Manager AD DS role.
 
 
