@@ -42,23 +42,24 @@ Steps
    ```powershell
    $cred = Get-Credential    # enter DOMAIN\Administrator
    Add-Computer -DomainName curtis.org -Credential $cred -Restart
-   
-6 ) Post-join validation (after restart)
-    On client: sign in using a domain account (use curtis\youruser).
-    From client run:
-    whoami (should show curtis\<username>)
-    nltest /dsgetdc:curtis.org (discovers DC)
-    nslookup curtis.org (resolves DC IP)
-    gpupdate /force then gpresult /r to confirm GPOs
+
+   5) Post-join validation (after restart)
+
+   - On client: sign in using a domain account (use curtis\youruser).
+   - From client run:
+        whoami (should show curtis\<username>)
+        nltest /dsgetdc:curtis.org (discovers DC)
+        nslookup curtis.org (resolves DC IP)
+        gpupdate /force then gpresult /r to confirm GPOs
 
 7 ) Common fixes if join fails
-    Ensure client DNS points only to DC (not to external DNS). Fix and retry join.
-    If credentials rejected: ensure clock skew is < 5 minutes between client and DC (fix with w32tm /resync).
-    If SRV not found: restart Netlogon and register DNS (steps in #4).
-    Check Event Viewer (System and Directory Service logs) on the DC and client for detailed errors.
+    - Ensure client DNS points only to DC (not to external DNS). Fix and retry join.
+    - If credentials rejected: ensure clock skew is < 5 minutes between client and DC (fix with w32tm /resync).
+    - If SRV not found: restart Netlogon and register DNS (steps in #4).
+    - Check Event Viewer (System and Directory Service logs) on the DC and client for detailed errors.
 
  8 ) Optional: remove a computer (cleanup)
-     From ADUC on DC: Computers → right-click machine → Delete
-     On client if still reachable: Remove-Computer -UnjoinDomaincredential (Get-Credential) -Restart   
+     - From ADUC on DC: Computers → right-click machine → Delete
+     - On client if still reachable: Remove-Computer -UnjoinDomaincredential (Get-Credential) -Restart   
 
     
