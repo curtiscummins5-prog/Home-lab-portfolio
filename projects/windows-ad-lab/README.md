@@ -8,11 +8,6 @@
 - [High-level steps performed](#high-level-steps-performed)  
 - [Key skills demonstrated](#key-skills-demonstrated)  
 - [Artifacts & Evidence](#artifacts--evidence)  
-- [How to reproduce (step-by-step)](#how-to-reproduce-step-by-step)  
-- [Troubleshooting / Common fixes](#troubleshooting--common-fixes)  
-- [Repository structure](#repository-structure)  
-- [CV bullets & Shareable summary](#cv-bullets--shareable-summary)  
-- [License / Contact](#license--contact)
 
 
 ## Environment
